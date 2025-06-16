@@ -40,11 +40,7 @@ import { useForm } from "react-hook-form";
 import { cn, getGridRows, updateColSpans } from "@/lib/utils";
 import { EditorToolbar } from "@/components/form-builder/form-components/wysiwyg/editor-toolbar";
 
-interface FormBuilderPageProps {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
-
-export default function FormBuilderPage({ searchParams }: FormBuilderPageProps) {
+export default function FormBuilderPage() {
   const isMobile = useIsMobile();
   // Split the store selectors to only subscribe to what we need
   const viewport = useFormBuilderStore((state) => state.viewport);
