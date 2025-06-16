@@ -2,8 +2,13 @@
 
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider, usePostHog } from "posthog-js/react";
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const PostHogPageView = dynamic(() => Promise.resolve(PostHogPageViewComponent), {
+  ssr: false,
+});
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
@@ -20,13 +25,13 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PHProvider client={posthog}>
-      <SuspendedPostHogPageView />
+      <PostHogPageView />
       {children}
     </PHProvider>
   );
 }
 
-function PostHogPageView() {
+function PostHogPageViewComponent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const posthog = usePostHog();
@@ -43,12 +48,4 @@ function PostHogPageView() {
   }, [pathname, searchParams, posthog]);
 
   return null;
-}
-
-function SuspendedPostHogPageView() {
-  return (
-    <Suspense fallback={null}>
-      <PostHogPageView />
-    </Suspense>
-  );
 }
