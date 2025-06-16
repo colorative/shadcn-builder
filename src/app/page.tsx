@@ -33,7 +33,6 @@ import {
 } from "@/components/form-builder/helpers/generate-react-code";
 import { MainExport } from "@/components/form-builder/dialogs/generate-code-dialog";
 import { MobileNotification } from "@/components/form-builder/ui/mobile-notification";
-import { useIsMobile } from "@/hooks/use-mobile";
 import SocialLinks from "@/components/form-builder/sidebar/socialLinks";
 import { OpenJsonDialog } from "@/components/form-builder/dialogs/open-json-dialog";
 import { useForm } from "react-hook-form";
@@ -41,7 +40,6 @@ import { cn, getGridRows, updateColSpans } from "@/lib/utils";
 import { EditorToolbar } from "@/components/form-builder/form-components/wysiwyg/editor-toolbar";
 
 export default function FormBuilderPage() {
-  const isMobile = useIsMobile();
   // Split the store selectors to only subscribe to what we need
   const viewport = useFormBuilderStore((state) => state.viewport);
   const mode = useFormBuilderStore((state) => state.mode);
@@ -357,60 +355,58 @@ export default function FormBuilderPage() {
         </div>
       </div>
 
-      {isMobile ? (
-        <>
-          <MobileNotification />
-          <div className="fixed bottom-0 w-full p-4 border-t">
-            <SocialLinks />
-          </div>
-        </>
-      ) : (
-        <>
-          <SidebarProvider
-            className="relative hidden md:block"
-            style={{ "--sidebar-width": "300px" } as React.CSSProperties}
-            open={mode === "editor"}
-          >
-            <DndContext
-              id="form-builder"
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-              onDragStart={handleDragStart}
-            >
-              <div className="flex w-full h-screen justify-between">
-                <SidebarLeft />
+      {/* Mobile notification - always rendered but hidden on desktop */}
+      <div className="md:hidden">
+        <MobileNotification />
+        <div className="fixed bottom-0 w-full p-4 border-t">
+          <SocialLinks />
+        </div>
+      </div>
 
-                <main
-                  className={cn(
-                    "flex-1 transition-all duration-300 overflow-auto relative bg-dotted pt-14 scrollbar-hide",
-                    mode === "preview" || mode === "export" && "bg-slate-50"
-                  )}
-                >
-                  {mode === "export" ? (
-                    <MainExport />
-                  ) : (
-                    <MainCanvas />
-                  )}
-                </main>
-                <SidebarRight />
+      {/* Desktop layout - always rendered but hidden on mobile */}
+      <SidebarProvider
+        className="relative hidden md:block"
+        style={{ "--sidebar-width": "300px" } as React.CSSProperties}
+        open={mode === "editor"}
+      >
+        <DndContext
+          id="form-builder"
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+          onDragStart={handleDragStart}
+        >
+          <div className="flex w-full h-screen justify-between">
+            <SidebarLeft />
+
+            <main
+              className={cn(
+                "flex-1 transition-all duration-300 overflow-auto relative bg-dotted pt-14 scrollbar-hide",
+                mode === "preview" || mode === "export" && "bg-slate-50"
+              )}
+            >
+              {mode === "export" ? (
+                <MainExport />
+              ) : (
+                <MainCanvas />
+              )}
+            </main>
+            <SidebarRight />
+          </div>
+          <DragOverlay>
+            {draggingDOMElement && (
+              <div className="bg-white p-2 rounded-md shadow opacity-80">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: draggingDOMElement.innerHTML,
+                  }}
+                  className="max-h-52 overflow-hidden"
+                />
               </div>
-              <DragOverlay>
-                {draggingDOMElement && (
-                  <div className="bg-white p-2 rounded-md shadow opacity-80">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: draggingDOMElement.innerHTML,
-                      }}
-                      className="max-h-52 overflow-hidden"
-                    />
-                  </div>
-                )}
-              </DragOverlay>
-            </DndContext>
-          </SidebarProvider>
-        </>
-      )}
+            )}
+          </DragOverlay>
+        </DndContext>
+      </SidebarProvider>
     </div>
   );
 }
